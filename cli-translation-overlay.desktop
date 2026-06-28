@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CLI Translation Overlay
+Name[zh_CN]=CLI 翻译浮层
+Comment=Real-time semi-transparent English HUD overlay for Chinese DeepSeek CLI
+Comment[zh_CN]=DeepSeek CLI 中文输出实时英文翻译浮层
+GenericName=Translation Overlay
+Categories=Utility;Development;Translation;
+Keywords=translation;overlay;hud;deepseek;cli;terminal;
+Icon=cli-translation-overlay
+Exec=cli-translation-overlay
+Terminal=false
+StartupWMClass=cli-translation-overlay
+StartupNotify=true
+X-GNOME-Autostart-enabled=false

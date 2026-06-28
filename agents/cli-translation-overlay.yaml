@@ -1,0 +1,27 @@
+name: cli-translation-overlay
+version: 0.3.0
+summary: Real-time semi-transparent English HUD overlay for Chinese DeepSeek CLI with bidirectional translation, thinking traces, state replay, and Terminus Protocol theme.
+use_when:
+  - translate Chinese CLI to English
+  - real-time translation overlay
+  - DeepSeek CLI English output
+  - bidirectional prompt translation
+  - AI conversation trace capture
+  - replay CLI sessions
+  - training data export
+principles:
+  - Overlay floats above terminal, never modifies CLI process.
+  - Translation is deterministic — same input always same output via cache.
+  - Bidirectional prompts use tiered local models (LM Studio → Ollama → Google Translate).
+  - Every session is saved to a replayable state file.
+  - Training traces are structured JSONL, not freeform.
+  - Terminus Protocol theme applied throughout (pink/purple/cyan/gold on void).
+  - PASS never guarantees translation accuracy or production readiness.
+entrypoints:
+  - overlay.py
+  - translator.py
+  - replay.py
+  - scripts/export_training_trace.py
+references:
+  - U-KSL.md
+  - SKILL.md

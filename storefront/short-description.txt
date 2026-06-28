@@ -1,0 +1,1 @@
+Translate Chinese DeepSeek CLI output into a real-time English HUD overlay with adjustable transparency, thinking trace inspection, and AI-powered bidirectional prompt translation.
