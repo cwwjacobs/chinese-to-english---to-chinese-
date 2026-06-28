@@ -1,13 +1,16 @@
 PYTHON ?= python3
-PACKAGE_VERSION ?= v0.3.0-rc1-terminus
+PACKAGE_VERSION ?= v0.3.0
 PACKAGE_NAME := cli-translation-overlay
 PACKAGE_ZIP := dist/$(PACKAGE_NAME)-$(PACKAGE_VERSION).zip
+CLI_CMD ?= deepseek-cli
+TRANS_FIFO ?= /tmp/trans_fifo
+OP_FIFO ?= /tmp/op_trans_fifo
 
-.PHONY: clean validate test package receipt smudge
+.PHONY: clean validate test package receipt prepare-fifos run-deepseek smoke smudge
 
 clean:
 	rm -rf dist build __pycache__ scripts/__pycache__ tests/__pycache__ .pytest_cache
-	rm -f /tmp/trans_fifo /tmp/op_trans_fifo
+	rm -f $(TRANS_FIFO) $(OP_FIFO)
 
 validate:
 	$(PYTHON) -m py_compile translator.py
@@ -16,6 +19,15 @@ validate:
 	$(PYTHON) -m py_compile scripts/export_training_trace.py
 	$(PYTHON) -m py_compile scripts/validate_package.py
 	$(PYTHON) -m py_compile tests/test_bundle.py
+
+prepare-fifos:
+	@for f in "$(TRANS_FIFO)" "$(OP_FIFO)"; do \
+		if [ -e "$$f" ] && [ ! -p "$$f" ]; then rm -f "$$f"; fi; \
+		if [ ! -p "$$f" ]; then mkfifo "$$f"; fi; \
+	done
+
+run-deepseek: prepare-fifos
+	tail -f $(OP_FIFO) | $(CLI_CMD) 2>&1 | $(PYTHON) translator.py --fifo $(TRANS_FIFO)
 
 test:
 	cd tests && $(PYTHON) -m pytest test_bundle.py -v 2>&1 || $(PYTHON) -m unittest test_bundle -v
@@ -34,12 +46,15 @@ package:
 receipt:
 	$(PYTHON) scripts/build_final_receipt.py --version $(PACKAGE_VERSION)
 
-# Quick end-to-end smoke test: start overlay, pipe a test message
-smudge:
+# Quick smoke test: start overlay, pipe a test message into the display FIFO.
+smoke: prepare-fifos
 	@echo "Starting overlay in background..."
 	$(PYTHON) overlay.py &
 	sleep 2
-	echo '{"role":"operator","original":"你好","translation":"Hello"}' > /tmp/trans_fifo
+	echo '{"role":"operator","original":"你好","translation":"Hello"}' > $(TRANS_FIFO)
 	sleep 1
 	@echo "Overlay should show 'Hello'. Press Ctrl+C to stop."
 	wait
+
+# Backward-compatible alias for earlier typo.
+smudge: smoke
